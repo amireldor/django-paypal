@@ -5,8 +5,6 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from paypal.standard.conf import *
 from paypal.standard.widgets import ValueHiddenInput, ReservedValueHiddenInput
-from paypal.standard.conf import (POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT, 
-    RECEIVER_EMAIL)
 
 
 # 20:18:05 Jan 30, 2009 PST - PST timezone support is not included out of the box.
@@ -110,7 +108,7 @@ class PayPalPaymentsForm(forms.Form):
     def _get_rendered_form(self, action):
         if DONT_USE_IMAGE:
             submit_html= '<input type="submit" name="submit" value="%s" />' \
-                 % ("Buy it Now")
+                 % (self.get_submit_text())
         else:
             submit_html = '<input type="image" src="%s" border="0" \
                 name="submit" alt="Buy it Now" />' % (self.get_image())
@@ -120,14 +118,19 @@ class PayPalPaymentsForm(forms.Form):
     %s
 </form>""" % (action, self.as_p(), submit_html))
 
+    def get_submit_text(self):
+        """The text that should be on the submit button or alt="" value of the
+        image on the pay form."""
+        return SUBMIT_TEXT[self.button_type]
+
     def get_image(self):
         return {
-            (True, self.SUBSCRIBE): SUBSCRIPTION_SANDBOX_IMAGE,
-            (True, self.BUY): SANDBOX_IMAGE,
-            (True, self.DONATE): DONATION_SANDBOX_IMAGE,
-            (False, self.SUBSCRIBE): SUBSCRIPTION_IMAGE,
-            (False, self.BUY): IMAGE,
-            (False, self.DONATE): DONATION_IMAGE,
+            (True, SUBSCRIBE): SUBSCRIPTION_SANDBOX_IMAGE,
+            (True, BUY): SANDBOX_IMAGE,
+            (True, DONATE): DONATION_SANDBOX_IMAGE,
+            (False, SUBSCRIBE): SUBSCRIPTION_IMAGE,
+            (False, BUY): IMAGE,
+            (False, DONATE): DONATION_IMAGE,
         }[TEST, self.button_type]
 
     def is_transaction(self):
