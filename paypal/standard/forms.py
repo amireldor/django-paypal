@@ -106,13 +106,18 @@ class PayPalPaymentsForm(forms.Form):
     %s
     <input type="image" src="%s" border="0" name="submit" alt="Buy it Now" />
 </form>""" % (POSTBACK_ENDPOINT, self.as_p(), self.get_image()))
-        
-        
+
     def sandbox(self):
+        if DONT_USE_IMAGE:
+            submit_html= '<input type="submit" name="submit" value="%s" />' \
+                 % ("Buy it Now")
+        else:
+            submit_html = '<input type="image" src="%s" border="0" \
+                name="submit" alt="Buy it Now" />' % (self.get_image())
         return mark_safe(u"""<form action="%s" method="post">
     %s
-    <input type="image" src="%s" border="0" name="submit" alt="Buy it Now" />
-</form>""" % (SANDBOX_POSTBACK_ENDPOINT, self.as_p(), self.get_image()))
+    %s
+</form>""" % (SANDBOX_POSTBACK_ENDPOINT, self.as_p(), submit_html))
         
     def get_image(self):
         return {
