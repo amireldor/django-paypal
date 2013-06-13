@@ -102,23 +102,24 @@ class PayPalPaymentsForm(forms.Form):
         self.button_type = button_type
 
     def render(self):
-        return mark_safe(u"""<form action="%s" method="post">
-    %s
-    <input type="image" src="%s" border="0" name="submit" alt="Buy it Now" />
-</form>""" % (POSTBACK_ENDPOINT, self.as_p(), self.get_image()))
+        return self._get_rendered_form(POSTBACK_ENDPOINT)
 
     def sandbox(self):
+        return self._get_rendered_form(SANDBOX_POSTBACK_ENDPOINT)
+
+    def _get_rendered_form(self, action):
         if DONT_USE_IMAGE:
             submit_html= '<input type="submit" name="submit" value="%s" />' \
                  % ("Buy it Now")
         else:
             submit_html = '<input type="image" src="%s" border="0" \
                 name="submit" alt="Buy it Now" />' % (self.get_image())
+
         return mark_safe(u"""<form action="%s" method="post">
     %s
     %s
-</form>""" % (SANDBOX_POSTBACK_ENDPOINT, self.as_p(), submit_html))
-        
+</form>""" % (action, self.as_p(), submit_html))
+
     def get_image(self):
         return {
             (True, self.SUBSCRIBE): SUBSCRIPTION_SANDBOX_IMAGE,
